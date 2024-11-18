@@ -6,7 +6,12 @@
         @change="$emit('update:modelValue', $event.target.value)"
         :class="['w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500', error ? 'border-red-500' : '']"
     >
-      <option v-for="option in options" :key="option.value" :value="option.value">
+      <option
+          v-for="option in options"
+          :key="option.value"
+          :value="option.value"
+          :disabled="option.disabled || false"
+      >
         {{ option.label }}
       </option>
     </select>
@@ -23,6 +28,7 @@ export default {
     options: {
       type: Array,
       required: true,
+      default: () => [],
     },
     error: Boolean,
   },

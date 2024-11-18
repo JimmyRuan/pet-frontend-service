@@ -22,18 +22,16 @@
         <!-- Breed -->
         <div v-if="pet.type">
           <label for="breed" class="block text-gray-700 font-medium text-left mb-2">What breed are they?</label>
-          <select
-              v-model="pet.breed"
+          <FormSelect
               id="breed"
+              v-if="pet.type"
+              v-model="pet.breed"
+              :options="breedOptions"
+              :error="!!errors.breed"
               @change="handleBreedSelection"
-              class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              required
-          >
-            <option value="" disabled>Choose One</option>
-            <option v-for="breed in breeds" :key="breed" :value="breed">{{ breed }}</option>
-            <option value="CantFindIt">Can't find it?</option>
-          </select>
+          />
         </div>
+
 
         <!-- Buttons for "I don’t know" or "It’s a mix" -->
         <div v-if="pet.breed === 'CantFindIt'" class="mt-4 ml-6">
@@ -226,9 +224,10 @@
 import { mapState, mapActions, mapGetters } from 'vuex';
 import FormInput from "@/components/form/FormInput.vue";
 import FormToggleButtonGroup from "@/components/form/FormToggleButtonGroup.vue";
+import FormSelect from "@/components/form/FormSelect.vue";
 
 export default {
-  components: {FormToggleButtonGroup, FormInput},
+  components: {FormSelect, FormToggleButtonGroup, FormInput},
   data() {
     return {
       dobOrAge: 'age',
@@ -285,6 +284,14 @@ export default {
           (this.dobOrAge === 'age' ? this.pet.ageOption : this.isValidDob()) &&
           this.pet.gender
       );
+    },
+    breedOptions() {
+      const breeds = this.getBreeds(this.pet.type) || [];
+      return [
+        { label: "Choose One", value: "", disabled: true },
+        ...breeds.map((breed) => ({ label: breed, value: breed })),
+        { label: "Can't find it?", value: "CantFindIt" },
+      ];
     },
   },
   methods: {
@@ -376,6 +383,7 @@ export default {
 
     this.pet.type = 'Dog';
     this.pet.gender = 'Male';
+    this.pet.breed = '';
   },
 };
 </script>
