@@ -1,14 +1,16 @@
 <template>
   <div>
+    <label v-if="label" :for="id" class="block text-gray-700 font-medium text-left mb-2">{{ label }}</label>
     <div v-for="option in options" :key="option.value" class="flex items-center space-x-2">
       <input
-          :name="name"
           type="radio"
+          :name="name"
           :value="option.value"
           :checked="modelValue === option.value"
-          @change="$emit('update:modelValue', option.value)"
+          @change="updateValue(option.value)"
+          :class="['focus:ring-blue-500', customClass]"
       />
-      <span>{{ option.label }}</span>
+      <span class="text-gray-700">{{ option.label }}</span>
     </div>
   </div>
 </template>
@@ -16,14 +18,40 @@
 <script>
 export default {
   props: {
-    modelValue: {
+    id: {
+      type: String,
+      required: false,
+    },
+    name: {
+      type: String,
       required: true,
     },
-    name: String,
+    label: {
+      type: String,
+      required: false,
+    },
     options: {
       type: Array,
       required: true,
     },
+    modelValue: {
+      type: [String, Number],
+      required: true,
+    },
+    customClass: {
+      type: String,
+      required: false,
+      default: '',
+    },
+  },
+  methods: {
+    updateValue(value) {
+      this.$emit('update:modelValue', value);
+    },
   },
 };
 </script>
+
+<style scoped>
+/* Add additional styles if needed */
+</style>

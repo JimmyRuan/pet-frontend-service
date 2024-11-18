@@ -37,35 +37,21 @@
         <div v-if="pet.breed === 'CantFindIt'" class="mt-4 ml-6">
           <p class="text-sm text-gray-500 mb-2 text-left font-bold">Choose One</p>
           <div class="flex flex-col space-y-4">
-            <label class="flex items-center space-x-2">
-              <input
-                  type="radio"
-                  name="cantFindBreed"
-                  value="I don’t know"
-                  v-model="cantFindBreedOption"
-                  @change="setCantFindBreedOption"
-                  class="focus:ring-blue-500"
-              />
-              <span class="text-gray-700">I don’t know</span>
-            </label>
+            <FormRadioGroup
+                name="cantFindBreed"
+                v-model="pet.cantFindBreedOption"
+                :options="[
+                  { label: 'I don’t know', value: 'I don’t know' },
+                  { label: 'It’s a mix', value: 'It’s a mix' }
+                ]"
+                label="Can't find the breed?"
+            />
 
-            <label class="flex items-center space-x-2">
-              <input
-                  type="radio"
-                  name="cantFindBreed"
-                  value="It’s a mix"
-                  v-model="cantFindBreedOption"
-                  @change="setCantFindBreedOption"
-                  class="focus:ring-blue-500"
-              />
-              <span class="text-gray-700">It’s a mix</span>
-            </label>
-
-            <div v-if="cantFindBreedOption === 'It’s a mix'" class="ml-6 mt-2">
+            <div v-if="pet.cantFindBreedOption === 'It’s a mix'" class="ml-6 mt-2">
               <label for="mixBreed" class="block text-gray-700 font-medium text-left mb-2">Mix Breed Details</label>
               <input
                   id="mixBreed"
-                  v-model="mixBreedDetails"
+                  v-model="pet.mixBreedDetails"
                   type="text"
                   placeholder="Enter mix breed details"
                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
@@ -225,9 +211,10 @@ import { mapState, mapActions, mapGetters } from 'vuex';
 import FormInput from "@/components/form/FormInput.vue";
 import FormToggleButtonGroup from "@/components/form/FormToggleButtonGroup.vue";
 import FormSelect from "@/components/form/FormSelect.vue";
+import FormRadioGroup from "@/components/form/FormRadioGroup.vue";
 
 export default {
-  components: {FormSelect, FormToggleButtonGroup, FormInput},
+  components: {FormRadioGroup, FormSelect, FormToggleButtonGroup, FormInput},
   data() {
     return {
       dobOrAge: 'age',
@@ -246,6 +233,8 @@ export default {
         type: "",
         breed: "",
         gender: "",
+        cantFindBreedOption: 'I don’t know',
+        mixBreedDetails: ""
       },
       petTypeOptions: [
         { label: "Cat", value: "Cat" },
