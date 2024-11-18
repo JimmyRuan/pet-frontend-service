@@ -302,19 +302,8 @@ export default {
 </script>
 
 <style scoped>
-.custom-blue-bg, .bg-blue-500 {
-  background-color: #0096e1;
-}
-
-.custom-blue-border {
-  border-color: #0096e1;
-}
 
 .custom-blue-text {
   color: #02386d;
-}
-
-.bg-blue-600:hover {
-  background-color: red;
 }
 </style>
