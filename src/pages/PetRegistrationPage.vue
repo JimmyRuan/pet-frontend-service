@@ -71,20 +71,19 @@
             ]"
         />
 
-
-
         <div v-if="pet.dobOrAge === 'age'" class="mb-4">
           <label for="ageOption" class="block text-gray-700 font-medium text-left mb-2">Approximate Age</label>
-          <select
+          <FormSelect
+              v-if="pet.dobOrAge === 'age'"
               id="ageOption"
+              label="Approximate Age"
               v-model="pet.ageOption"
-              class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              required
-          >
-            <option value="" disabled>Select Age</option>
-            <option v-for="age in ageOptions" :key="age" :value="age">{{ age }}</option>
-          </select>
+              :options="ageOptions.map(age => ({ label: age, value: age }))"
+              :error="!!errors.ageOption"
+          />
         </div>
+
+
 
         <!-- Date of Birth -->
         <div v-if="pet.dobOrAge === 'dob'" class="mb-4">
@@ -218,7 +217,7 @@ export default {
         gender: "",
         cantFindBreedOption: 'I don’t know',
         mixBreedDetails: "",
-        dobOrAge: ""
+        dobOrAge: "age"
       },
       petTypeOptions: [
         { label: "Cat", value: "Cat" },
@@ -358,6 +357,7 @@ export default {
     this.pet.type = 'Dog';
     this.pet.gender = 'Male';
     this.pet.breed = '';
+    // this.pet.
   },
 };
 </script>
