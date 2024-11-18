@@ -4,46 +4,20 @@
       <h1 class="text-xl font-semibold custom-blue-text mb-6 text-left">Register Your Pet</h1>
       <form @submit.prevent="savePet" class="space-y-6">
         <!-- Pet's Name -->
-        <div>
-          <label for="name" class="block text-gray-700 font-medium text-left mb-2">What is your pet's name?</label>
-          <input
-              v-model="pet.name"
-              id="name"
-              type="text"
-              placeholder="Enter your pet's name"
-              class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              required
-          />
-        </div>
+        <FormInput
+            id="name"
+            v-model="pet.name"
+            placeholder="Enter your pet's name"
+            :error="!!errors.name"
+        />
 
         <!-- Pet Type -->
-        <div>
-          <label for="type" class="block text-gray-700 font-medium text-left mb-2">Pet Type</label>
-          <div class="flex items-center">
-            <button
-                type="button"
-                :class="{
-                  'custom-blue-bg text-white custom-blue-border': pet.type === 'Cat',
-                  'bg-white text-blue-500 custom-blue-border': pet.type !== 'Cat',
-                }"
-                class="border rounded-l-lg px-6 py-1 w-1/4 focus:outline-none"
-                @click="selectPetType('Cat')"
-            >
-              Cat
-            </button>
-            <button
-                type="button"
-                :class="{
-                  'custom-blue-bg text-white custom-blue-border': pet.type === 'Dog',
-                  'bg-white text-blue-500 custom-blue-border': pet.type !== 'Dog',
-                }"
-                class="border rounded-r-lg px-6 py-1 w-1/4 focus:outline-none"
-                @click="selectPetType('Dog')"
-            >
-              Dog
-            </button>
-          </div>
-        </div>
+        <FormToggleButtonGroup
+            id="type"
+            label="Pet Type"
+            v-model="pet.type"
+            :options="petTypeOptions"
+        />
 
         <!-- Breed -->
         <div v-if="pet.type">
@@ -250,8 +224,11 @@
 
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
+import FormInput from "@/components/form/FormInput.vue";
+import FormToggleButtonGroup from "@/components/form/FormToggleButtonGroup.vue";
 
 export default {
+  components: {FormToggleButtonGroup, FormInput},
   data() {
     return {
       dobOrAge: 'age',
@@ -265,6 +242,19 @@ export default {
         'July', 'August', 'September', 'October', 'November', 'December',
       ],
       dobErrors: [],
+      pet: {
+        name: "",
+        type: "",
+        breed: "",
+        gender: "",
+      },
+      petTypeOptions: [
+        { label: "Cat", value: "Cat" },
+        { label: "Dog", value: "Dog" },
+      ],
+      errors: {
+        name: null,
+      },
     };
   },
   computed: {
@@ -383,6 +373,9 @@ export default {
   mounted() {
     this.updatePetField({ field: 'gender', value: 'Male' });
     this.updatePetField({ field: 'type', value: 'Dog' });
+
+    this.pet.type = 'Dog';
+    this.pet.gender = 'Male';
   },
 };
 </script>
