@@ -112,7 +112,7 @@
         <!-- Submit Button -->
         <div class="flex justify-center">
           <button
-              class="text-white px-4 py-1 rounded-lg custom-blue-bg cursor-pointer"
+              class="text-white px-6 py-1 rounded-lg custom-blue-bg cursor-pointer hover:bg-blue-500 hover:text-xl"
           >
             Save Pet
           </button>
@@ -131,6 +131,9 @@ import FormRadioGroup from "@/components/form/FormRadioGroup.vue";
 import DateOfBirthForm from "@/components/form/DateOfBirthForm.vue";
 import {required, validateYearMonthDay} from "@/services/validationRules";
 import {getAllMonths} from "@/services/util";
+import {calculateDateOfBirth, createDateFromYMD, formatDateToString} from "@/services/DateService";
+import ConfigService from "@/services/ConfigService";
+import HttpClient from "@/services/HttpClient";
 
 export default {
   components: {DateOfBirthForm, FormRadioGroup, FormSelect, FormToggleButtonGroup, FormInput},
@@ -196,9 +199,6 @@ export default {
       if (!month || !year) return 0;
       return new Date(year, month, 0).getDate();
     },
-    updateType() {
-      this.updatePetField({ field: 'type', value: this.pet.type });
-    },
     handleBreedSelection() {
       if (this.pet.breed !== 'CantFindIt') {
         this.cantFindBreedOption = 'I don’t know';
@@ -219,7 +219,21 @@ export default {
         this.pet.dobDay = value;
       }
     },
-    savePet() {
+    getBirthDayStr() {
+      let birthDay;
+      if (this.pet.dobOrAge === 'dob') {
+        `${this.pet.dobYear}-${String(this.pet.dobMonth).padStart(2, '0')}-${String(this.pet.dobDay).padStart(2, '0')}`;
+        birthDay = createDateFromYMD(this.pet.dobYear, this.pet.dobMonth, this.pet.dobDay);
+      } else if (this.pet.dobOrAge === 'age'){
+        birthDay = calculateDateOfBirth(this.pet.ageOption);
+      } else {
+         console.error("This error should not be triggered for getBirthDayStr");
+         return;
+      }
+
+      return formatDateToString(birthDay);
+    },
+    validateData() {
       // Reset errors
       this.errors = {
         name: null,
@@ -246,22 +260,40 @@ export default {
       } else if (this.pet.dobOrAge === 'age') {
         this.errors.ageOption = required('Age Option', this.pet.ageOption);
       }
+    },
+    transformPetForCreation(pet) {
+      return {
+        name: pet.name,
+        type: pet.type,
+        breed: pet.breed,
+        date_of_birth: pet.dobStr,
+        gender: pet.gender,
+      };
+    },
+    async sendPetData(data) {
+      const apiUrl = ConfigService.getApiUrl();
+      const url = `${apiUrl}/pets`;
 
-      // Check for validation errors
+      return await HttpClient.post(url, data);
+    },
+
+    async savePet() {
+      this.validateData();
       const hasErrors = Object.values(this.errors).some((error) => error);
-
-      // Print errors if any
       if (hasErrors) {
         return;
       }
 
-      // Prepare DOB string if applicable
-      if (this.pet.dobOrAge === 'dob') {
-        this.pet.dobStr = `${this.dobYear}-${String(this.dobMonth).padStart(2, '0')}-${String(this.dobDay).padStart(2, '0')}`;
-      }
+      this.pet.dobStr = this.getBirthDayStr();
+      const petRequestData = this.transformPetForCreation(this.pet);
+
+      const response = await this.sendPetData(petRequestData);
+      console.log("I am here at 285", response);
+
+
 
       // Save the pet details
-      console.log('Saved Pet:', this.pet);
+      console.log('Saved Pet:', [this.pet, petRequestData]);
     },
   },
 };
