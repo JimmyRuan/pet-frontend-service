@@ -12,7 +12,7 @@
               id="name"
               v-model="pet.name"
               placeholder="Enter your pet's name"
-              :error="!!errors.name"
+              :errors="errors.name"
           />
         </div>
 
@@ -32,7 +32,7 @@
               v-if="pet.type"
               v-model="pet.breed"
               :options="breedOptions"
-              :error="!!errors.breed"
+              :errors="errors.breed"
               @change="handleBreedSelection"
           />
         </div>
@@ -54,12 +54,11 @@
 
             <div v-if="pet.cantFindBreedOption === 'It’s a mix'" class="ml-6 mt-2">
               <label for="mixBreed" class="block text-gray-700 font-medium text-left mb-2">Mix Breed Details</label>
-              <input
+              <FormInput
                   id="mixBreed"
                   v-model="pet.mixBreedDetails"
-                  type="text"
                   placeholder="Enter mix breed details"
-                  class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                  :errors="errors.mixBreedDetails"
               />
             </div>
           </div>
@@ -83,8 +82,8 @@
               id="ageOption"
               label="Approximate Age"
               v-model="pet.ageOption"
-              :options="ageOptions.map(age => ({ label: age, value: age }))"
-              :error="!!errors.ageOption"
+              :options="localAgeOptions"
+              :errors="errors.ageOption"
           />
         </div>
 
@@ -95,10 +94,8 @@
             :months="months"
             :daysInMonth="pet.daysInMonth"
             :currentYear="currentYear"
-            :errors="pet.dobErrors"
-            @update-days="updateDays"
-            @validate-day="localValidateDay"
-            @validate-year="localValidateYear"
+            :errors="errors.dobErrors"
+            @update-dob="handleDobUpdate"
         />
 
         <!-- Gender -->
@@ -115,9 +112,7 @@
         <!-- Submit Button -->
         <div class="flex justify-center">
           <button
-              :disabled="!isFormValid"
-              :class="isFormValid ? 'bg-blue-500' : 'bg-gray-400 cursor-not-allowed'"
-              class="text-white px-4 py-1 rounded-lg"
+              class="text-white px-4 py-1 rounded-lg custom-blue-bg cursor-pointer"
           >
             Save Pet
           </button>
@@ -134,17 +129,14 @@ import FormToggleButtonGroup from "@/components/form/FormToggleButtonGroup.vue";
 import FormSelect from "@/components/form/FormSelect.vue";
 import FormRadioGroup from "@/components/form/FormRadioGroup.vue";
 import DateOfBirthForm from "@/components/form/DateOfBirthForm.vue";
-import {validateDay, validateYear} from "@/services/validationRules";
+import {required, validateYearMonthDay} from "@/services/validationRules";
+import {getAllMonths} from "@/services/util";
 
 export default {
   components: {DateOfBirthForm, FormRadioGroup, FormSelect, FormToggleButtonGroup, FormInput},
   data() {
     return {
-      months: [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December',
-      ],
-      dobErrors: [],
+      months: getAllMonths(),
       pet: {
         name: "",
         type: "Dog",
@@ -152,6 +144,7 @@ export default {
         gender: "Male",
         cantFindBreedOption: 'I don’t know',
         mixBreedDetails: "",
+        ageOption: "",
         dobOrAge: "age",
         dobMonth: "",
         dobDay: "",
@@ -167,7 +160,7 @@ export default {
         breed: null,
         dobErrors: null,
         ageOption: null,
-
+        mixBreedDetails: null,
       },
     };
   },
@@ -185,21 +178,6 @@ export default {
       const endYear = this.currentYear - 100;
       return Array.from({ length: startYear - endYear + 1 }, (_, i) => startYear - i);
     },
-    daysInMonth() {
-      if (!this.dobMonth || !this.dobYear) return [];
-      const days = new Date(this.dobYear, this.dobMonth, 0).getDate();
-      return Array.from({ length: days }, (_, i) => i + 1);
-    },
-    isFormValid() {
-      return (
-          this.pet.name &&
-          this.pet.type &&
-          this.pet.breed &&
-          this.dobOrAge &&
-          (this.dobOrAge === 'age' ? this.pet.ageOption : this.isValidDob()) &&
-          this.pet.gender
-      );
-    },
     breedOptions() {
       const breeds = this.getBreeds(this.pet.type) || [];
       return [
@@ -208,9 +186,19 @@ export default {
         { label: "Can't find it?", value: "CantFindIt" },
       ];
     },
+    localAgeOptions() {
+        return [
+          { label: "Select Age", value: "", disabled: true },
+           ...this.ageOptions.map(age => ({ label: age, value: age }))
+        ];
+    }
   },
   methods: {
     ...mapActions(['updatePetField']),
+    daysInMonth(month, year) {
+      if (!month || !year) return 0;
+      return new Date(year, month, 0).getDate();
+    },
     updateType() {
       this.updatePetField({ field: 'type', value: this.pet.type });
     },
@@ -223,14 +211,6 @@ export default {
     selectPetType(type) {
       this.updatePetField({ field: 'type', value: type });
     },
-    selectDobOrAge(option) {
-      this.dobOrAge = option;
-      if (option === 'age') {
-        this.clearDob();
-      } else {
-        this.clearAgeOption();
-      }
-    },
     selectGender(gender) {
       this.updatePetField({ field: 'gender', value: gender });
     },
@@ -238,46 +218,62 @@ export default {
       this.updatePetField({ field: 'breed', value: 'CantFindIt' });
     },
     clearDob() {
-      this.dobMonth = '';
-      this.dobDay = '';
-      this.dobYear = '';
+      this.pet.dobMonth = '';
+      this.pet.dobDay = '';
+      this.pet.dobYear = '';
     },
-    clearAgeOption() {
-      this.updatePetField({ field: 'ageOption', value: '' });
-    },
-    updateDays() {
-      this.dobDay = ''; // Reset day selection when month changes
-    },
-    isValidDob() {
-      console.log("I am here at 252");
-      return (
-          this.dobMonth &&
-          this.dobDay &&
-          this.dobYear &&
-          this.dobYear >= this.currentYear - 100 &&
-          this.dobYear <= this.currentYear
-      );
-    },
-    localValidateDay() {
-      const maxDays = this.daysInMonth;
-      this.errors.dobDay = validateDay(this.dobDay, maxDays);
-    },
-    localValidateYear() {
-      this.errors.dobYear = validateYear(this.pet.dobYear, this.currentYear)
+    handleDobUpdate({field, value}) {
+      if(field === 'month'){
+        this.pet.dobMonth = value;
+      } else if(field === 'year') {
+        this.pet.dobYear = value;
+      } else if(field === 'day') {
+        this.pet.dobDay = value;
+      }
     },
     savePet() {
-      this.localValidateYear();
-      this.localValidateDay();
+      // Reset errors
+      this.errors = {
+        name: null,
+        breed: null,
+        dobErrors: null,
+        ageOption: null,
+      };
 
+      // Validate pet name
+      this.errors.name = required('Name', this.pet.name);
 
-      if (this.dobOrAge === 'dob' && this.isValidDob()) {
-        this.updatePetField({
-          field: 'dob',
-          value: `${this.dobYear}-${String(this.dobMonth).padStart(2, '0')}-${String(this.dobDay).padStart(2, '0')}`,
-        });
+      // Validate breed
+      if (this.pet.type) {
+        this.errors.breed = required('Breed', this.pet.breed);
       }
+
+      if(this.pet.cantFindBreedOption === 'It’s a mix'){
+        this.errors.mixBreedDetails = required('Breed Detail', this.pet.mixBreedDetails);
+      }
+
+      // Validate DOB or Age
+      if (this.pet.dobOrAge === 'dob') {
+        this.errors.dobErrors = validateYearMonthDay(this.pet.dobDay, this.pet.dobMonth, this.pet.dobYear);
+      } else if (this.pet.dobOrAge === 'age') {
+        this.errors.ageOption = required('Age Option', this.pet.ageOption);
+      }
+
+      // Check for validation errors
+      const hasErrors = Object.values(this.errors).some((error) => error);
+
+      // Print errors if any
+      if (hasErrors) {
+        return;
+      }
+
+      // Prepare DOB string if applicable
+      if (this.pet.dobOrAge === 'dob') {
+        this.pet.dobStr = `${this.dobYear}-${String(this.dobMonth).padStart(2, '0')}-${String(this.dobDay).padStart(2, '0')}`;
+      }
+
+      // Save the pet details
       console.log('Saved Pet:', this.pet);
-      alert('Pet details saved successfully!');
     },
   },
   mounted() {
@@ -289,5 +285,9 @@ export default {
 
 .custom-blue-text {
   color: #02386d;
+}
+
+.custom-blue-bg {
+  background-color: #0096e1;
 }
 </style>

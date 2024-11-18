@@ -27,11 +27,9 @@
             :value="dob.day"
             @input="updateDob('day', $event.target.value)"
             type="number"
-            min="1"
-            :max="daysInMonth"
+
             placeholder="dd"
             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-            @blur="validateDay"
             required
         />
       </div>
@@ -44,23 +42,24 @@
             :value="dob.year"
             @input="updateDob('year', $event.target.value)"
             type="number"
-            :min="currentYear - 100"
-            :max="currentYear"
             placeholder="yyyy"
             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-            @blur="validateYear"
             required
         />
       </div>
     </div>
-    <ul v-if="errors.length" class="text-red-500 text-sm mt-2">
-      <li v-for="(error, index) in errors" :key="index">{{ error }}</li>
-    </ul>
+
+    <ErrorList :errors="errors" />
   </div>
 </template>
 
 <script>
+import useErrors from "@/mixins/useErrors";
+import ErrorList from "@/components/form/ErrorList.vue";
+
 export default {
+  components: {ErrorList},
+  mixins: [useErrors],
   props: {
     dob: {
       type: Object,
@@ -77,10 +76,6 @@ export default {
     currentYear: {
       type: Number,
       required: true,
-    },
-    errors: {
-      type: Array,
-      default: () => [],
     },
   },
   methods: {

@@ -18,11 +18,18 @@
         {{ option.label }}
       </button>
     </div>
+
+    <ErrorList :errors="errors" />
   </div>
 </template>
 
 <script>
+import useErrors from "@/mixins/useErrors";
+import ErrorList from "@/components/form/ErrorList.vue";
+
 export default {
+  components: {ErrorList},
+  mixins: [useErrors],
   props: {
     id: {
       type: String,
