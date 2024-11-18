@@ -84,62 +84,17 @@
         </div>
 
         <!-- Date of Birth -->
-        <div v-if="pet.dobOrAge === 'dob'" class="mb-4">
-          <label class="block text-gray-700 font-medium text-left mb-2">Date of Birth</label>
-          <div class="flex space-x-4">
-            <!-- Month Dropdown -->
-            <div class="w-1/3">
-              <label for="month" class="block text-gray-700 text-sm font-medium mb-1">Month</label>
-              <select
-                  id="month"
-                  v-model="dobMonth"
-                  @change="updateDays"
-                  class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                  required
-              >
-                <option value="" disabled>Select</option>
-                <option v-for="(month, index) in months" :key="index" :value="index + 1">
-                  {{ month }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Day Input -->
-            <div class="w-1/3">
-              <label for="day" class="block text-gray-700 text-sm font-medium mb-1">Day</label>
-              <input
-                  id="day"
-                  v-model="dobDay"
-                  type="number"
-                  min="1"
-                  :max="daysInMonth"
-                  placeholder="dd"
-                  class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                  @blur="validateDay"
-                  required
-              />
-            </div>
-
-            <!-- Year Input -->
-            <div class="w-1/3">
-              <label for="year" class="block text-gray-700 text-sm font-medium mb-1">Year</label>
-              <input
-                  id="year"
-                  v-model="dobYear"
-                  type="number"
-                  :min="currentYear - 100"
-                  :max="currentYear"
-                  placeholder="yyyy"
-                  class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                  @blur="validateYear"
-                  required
-              />
-            </div>
-          </div>
-          <ul v-if="dobErrors.length" class="text-red-500 text-sm mt-2">
-            <li v-for="(error, index) in dobErrors" :key="index">{{ error }}</li>
-          </ul>
-        </div>
+        <DateOfBirthForm
+            v-if="pet.dobOrAge === 'dob'"
+            :dob="{ month: pet.dobMonth, day: pet.dobDay, year: pet.dobYear }"
+            :months="months"
+            :daysInMonth="pet.daysInMonth"
+            :currentYear="currentYear"
+            :errors="pet.dobErrors"
+            @update-days="updateDays"
+            @validate-day="validateDay"
+            @validate-year="validateYear"
+        />
 
         <!-- Gender -->
         <FormToggleButtonGroup
@@ -173,9 +128,10 @@ import FormInput from "@/components/form/FormInput.vue";
 import FormToggleButtonGroup from "@/components/form/FormToggleButtonGroup.vue";
 import FormSelect from "@/components/form/FormSelect.vue";
 import FormRadioGroup from "@/components/form/FormRadioGroup.vue";
+import DateOfBirthForm from "@/components/form/DateOfBirthForm.vue";
 
 export default {
-  components: {FormRadioGroup, FormSelect, FormToggleButtonGroup, FormInput},
+  components: {DateOfBirthForm, FormRadioGroup, FormSelect, FormToggleButtonGroup, FormInput},
   data() {
     return {
       dobOrAge: 'age',
@@ -196,7 +152,11 @@ export default {
         gender: "",
         cantFindBreedOption: 'I don’t know',
         mixBreedDetails: "",
-        dobOrAge: "age"
+        dobOrAge: "age",
+        dobMonth: "",
+        dobDay: "",
+        dobYear: "",
+        dobErrors: [],
       },
       petTypeOptions: [
         { label: "Cat", value: "Cat" },
