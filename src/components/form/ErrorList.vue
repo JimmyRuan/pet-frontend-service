@@ -5,13 +5,9 @@
 </template>
 
 <script>
+import useErrors from "@/mixins/useErrors";
 export default {
-  props: {
-    errors: {
-      type: [String, Array],
-      required: true,
-    },
-  },
+  mixins: [useErrors],
   computed: {
     errorList() {
       // If errors is a string, wrap it in an array; otherwise, return the array as is

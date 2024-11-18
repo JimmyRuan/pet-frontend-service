@@ -91,9 +91,6 @@
         <DateOfBirthForm
             v-if="pet.dobOrAge === 'dob'"
             :dob="{ month: pet.dobMonth, day: pet.dobDay, year: pet.dobYear }"
-            :months="months"
-            :daysInMonth="pet.daysInMonth"
-            :currentYear="currentYear"
             :errors="errors.dobErrors"
             @update-dob="handleDobUpdate"
         />
@@ -130,7 +127,6 @@ import FormSelect from "@/components/form/FormSelect.vue";
 import FormRadioGroup from "@/components/form/FormRadioGroup.vue";
 import DateOfBirthForm from "@/components/form/DateOfBirthForm.vue";
 import {required, validateYearMonthDay} from "@/services/validationRules";
-import {getAllMonths} from "@/services/util";
 import {calculateDateOfBirth, createDateFromYMD, formatDateToString} from "@/services/DateService";
 import ConfigService from "@/services/ConfigService";
 import HttpClient from "@/services/HttpClient";
@@ -139,21 +135,7 @@ export default {
   components: {DateOfBirthForm, FormRadioGroup, FormSelect, FormToggleButtonGroup, FormInput},
   data() {
     return {
-      months: getAllMonths(),
-      pet: {
-        name: "",
-        type: "Dog",
-        breed: "",
-        gender: "Male",
-        cantFindBreedOption: 'I don’t know',
-        mixBreedDetails: "",
-        ageOption: "",
-        dobOrAge: "age",
-        dobMonth: "",
-        dobDay: "",
-        dobYear: "",
-        dobErrors: [],
-      },
+      pet: this.defaultPetInfo(),
       petTypeOptions: [
         { label: "Cat", value: "Cat" },
         { label: "Dog", value: "Dog" },
@@ -170,14 +152,6 @@ export default {
   computed: {
     ...mapState('pet', ['petTypes', 'ageOptions']),
     ...mapGetters('pet', ['getBreeds']),
-    currentYear() {
-      return new Date().getFullYear();
-    },
-    years() {
-      const startYear = this.currentYear;
-      const endYear = this.currentYear - 100;
-      return Array.from({ length: startYear - endYear + 1 }, (_, i) => startYear - i);
-    },
     breedOptions() {
       const breeds = this.getBreeds(this.pet.type) || [];
       return [
@@ -195,10 +169,6 @@ export default {
   },
   methods: {
     ...mapActions('pet', ['updatePetField']),
-    daysInMonth(month, year) {
-      if (!month || !year) return 0;
-      return new Date(year, month, 0).getDate();
-    },
     handleBreedSelection() {
       if (this.pet.breed !== 'CantFindIt') {
         this.cantFindBreedOption = 'I don’t know';
@@ -269,6 +239,22 @@ export default {
         date_of_birth: pet.dobStr,
         gender: pet.gender,
       };
+    },
+    defaultPetInfo() {
+      return {
+                 name: "",
+                 type: "Dog",
+                  breed: "",
+                  gender: "Male",
+                  cantFindBreedOption: 'I don’t know',
+                  mixBreedDetails: "",
+                  ageOption: "",
+                  dobOrAge: "age",
+                  dobMonth: "",
+                  dobDay: "",
+                  dobYear: "",
+                  dobErrors: [],
+            }
     },
     async sendPetData(data) {
       const apiUrl = ConfigService.getApiUrl();

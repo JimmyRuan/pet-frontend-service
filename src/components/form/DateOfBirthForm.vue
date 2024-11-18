@@ -56,6 +56,7 @@
 <script>
 import useErrors from "@/mixins/useErrors";
 import ErrorList from "@/components/form/ErrorList.vue";
+import {getAllMonths} from "@/services/util";
 
 export default {
   components: {ErrorList},
@@ -65,17 +66,13 @@ export default {
       type: Object,
       required: true,
     },
-    months: {
-      type: Array,
-      required: true,
+  },
+  computed: {
+    currentYear() {
+      return new Date().getFullYear(); // Dynamically compute the current year
     },
-    daysInMonth: {
-      type: Number,
-      required: true,
-    },
-    currentYear: {
-      type: Number,
-      required: true,
+    months() {
+      return getAllMonths();
     },
   },
   methods: {
