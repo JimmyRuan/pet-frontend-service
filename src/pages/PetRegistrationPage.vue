@@ -61,36 +61,19 @@
         </div>
 
 
-        <div>
-          <label class="block text-gray-700 font-medium text-left mb-2">Do you know their date of birth?</label>
-          <div class="flex items-center">
-            <button
-                type="button"
-                :class="{
-                    'custom-blue-bg text-white custom-blue-border': dobOrAge === 'dob',
-                    'bg-white text-blue-500 custom-blue-border': dobOrAge !== 'dob',
-                  }"
-                class="border rounded-l-lg px-6 py-1 w-1/4 focus:outline-none"
-                @click="selectDobOrAge('dob')"
-            >
-              Yes
-            </button>
-            <button
-                type="button"
-                :class="{
-                'custom-blue-bg text-white custom-blue-border': dobOrAge === 'age',
-                'bg-white text-blue-500 custom-blue-border': dobOrAge !== 'age',
-              }"
-                class="border rounded-r-lg px-6 py-1 w-1/4 focus:outline-none"
-                @click="selectDobOrAge('age')"
-            >
-              No
-            </button>
-          </div>
+        <FormToggleButtonGroup
+            id="dobOrAge"
+            label="Do you know their date of birth?"
+            v-model="pet.dobOrAge"
+            :options="[
+              { label: 'Yes', value: 'dob' },
+              { label: 'No', value: 'age' }
+            ]"
+        />
 
-        </div>
 
-        <div v-if="dobOrAge === 'age'" class="mb-4">
+
+        <div v-if="pet.dobOrAge === 'age'" class="mb-4">
           <label for="ageOption" class="block text-gray-700 font-medium text-left mb-2">Approximate Age</label>
           <select
               id="ageOption"
@@ -104,7 +87,7 @@
         </div>
 
         <!-- Date of Birth -->
-        <div v-if="dobOrAge === 'dob'" class="mb-4">
+        <div v-if="pet.dobOrAge === 'dob'" class="mb-4">
           <label class="block text-gray-700 font-medium text-left mb-2">Date of Birth</label>
           <div class="flex space-x-4">
             <!-- Month Dropdown -->
@@ -234,7 +217,8 @@ export default {
         breed: "",
         gender: "",
         cantFindBreedOption: 'I don’t know',
-        mixBreedDetails: ""
+        mixBreedDetails: "",
+        dobOrAge: ""
       },
       petTypeOptions: [
         { label: "Cat", value: "Cat" },
@@ -291,6 +275,7 @@ export default {
     handleBreedSelection() {
       if (this.pet.breed !== 'CantFindIt') {
         this.cantFindBreedOption = 'I don’t know';
+        this.pet.cantFindBreedOption = 'I don’t know';
       }
     },
     selectPetType(type) {
