@@ -1,50 +1,34 @@
 <template>
   <div>
-    <label class="block text-gray-700 font-medium text-left mb-2">{{ label }}</label>
-    <div class="flex space-x-4">
-      <!-- Month -->
-      <FormSelect
-          id="month"
-          label="Month"
-          :options="monthOptions"
-          v-model="model.month"
-          :error="errors.month"
-      />
-      <!-- Day -->
-      <FormInput
-          id="day"
-          label="Day"
-          type="number"
-          v-model="model.day"
-          placeholder="dd"
-          :error="errors.day"
-      />
-      <!-- Year -->
-      <FormInput
-          id="year"
-          label="Year"
-          type="number"
-          v-model="model.year"
-          placeholder="yyyy"
-          :error="errors.year"
-      />
-    </div>
-    <ul v-if="Object.values(errors).some((err) => err)" class="text-red-500 text-sm mt-2">
-      <li v-for="(error, key) in errors" :key="key" v-if="error">{{ error }}</li>
+    <input
+        type="date"
+        :value="modelValue"
+        @input="$emit('update:modelValue', $event.target.value)"
+        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+    />
+    <ul v-if="errors.length" class="text-red-500 text-sm mt-2">
+      <li v-for="(error, index) in filteredErrors" :key="index">{{ error }}</li>
     </ul>
   </div>
 </template>
 
 <script>
-import FormInput from "./FormInput.vue";
-import FormSelect from "./FormSelect.vue";
-
 export default {
-  components: { FormInput, FormSelect },
   props: {
-    label: { type: String, required: true },
-    model: { type: Object, required: true },
-    errors: { type: Object, required: true },
+    modelValue: {
+      type: String,
+      required: true,
+    },
+    errors: {
+      type: Array,
+      default: () => [], // Ensure errors is always an array
+    },
+  },
+  computed: {
+    // filteredErrors() {
+    //   return Array.isArray(this.errors) ? this.errors.filter((error) => error.someCondition) : [];
+    // },
   },
 };
 </script>
+
