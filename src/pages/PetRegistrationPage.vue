@@ -4,12 +4,17 @@
       <h1 class="text-xl font-semibold custom-blue-text mb-6 text-left">Register Your Pet</h1>
       <form @submit.prevent="savePet" class="space-y-6">
         <!-- Pet's Name -->
-        <FormInput
-            id="name"
-            v-model="pet.name"
-            placeholder="Enter your pet's name"
-            :error="!!errors.name"
-        />
+        <div>
+          <label for="breed" class="block text-gray-700 font-medium text-left mb-2">
+            What is your pet's name?
+          </label>
+          <FormInput
+              id="name"
+              v-model="pet.name"
+              placeholder="Enter your pet's name"
+              :error="!!errors.name"
+          />
+        </div>
 
         <!-- Pet Type -->
         <FormToggleButtonGroup
@@ -92,8 +97,8 @@
             :currentYear="currentYear"
             :errors="pet.dobErrors"
             @update-days="updateDays"
-            @validate-day="validateDay"
-            @validate-year="validateYear"
+            @validate-day="localValidateDay"
+            @validate-year="localValidateYear"
         />
 
         <!-- Gender -->
@@ -112,7 +117,7 @@
           <button
               :disabled="!isFormValid"
               :class="isFormValid ? 'bg-blue-500' : 'bg-gray-400 cursor-not-allowed'"
-              class="text-white px-4 py-2 rounded-lg"
+              class="text-white px-4 py-1 rounded-lg"
           >
             Save Pet
           </button>
@@ -129,17 +134,12 @@ import FormToggleButtonGroup from "@/components/form/FormToggleButtonGroup.vue";
 import FormSelect from "@/components/form/FormSelect.vue";
 import FormRadioGroup from "@/components/form/FormRadioGroup.vue";
 import DateOfBirthForm from "@/components/form/DateOfBirthForm.vue";
+import {validateDay, validateYear} from "@/services/validationRules";
 
 export default {
   components: {DateOfBirthForm, FormRadioGroup, FormSelect, FormToggleButtonGroup, FormInput},
   data() {
     return {
-      dobOrAge: 'age',
-      cantFindBreedOption: 'I don’t know',
-      mixBreedDetails: '',
-      dobMonth: '',
-      dobDay: '',
-      dobYear: '',
       months: [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December',
@@ -147,9 +147,9 @@ export default {
       dobErrors: [],
       pet: {
         name: "",
-        type: "",
+        type: "Dog",
         breed: "",
-        gender: "",
+        gender: "Male",
         cantFindBreedOption: 'I don’t know',
         mixBreedDetails: "",
         dobOrAge: "age",
@@ -164,6 +164,10 @@ export default {
       ],
       errors: {
         name: null,
+        breed: null,
+        dobErrors: null,
+        ageOption: null,
+
       },
     };
   },
@@ -245,6 +249,7 @@ export default {
       this.dobDay = ''; // Reset day selection when month changes
     },
     isValidDob() {
+      console.log("I am here at 252");
       return (
           this.dobMonth &&
           this.dobDay &&
@@ -253,30 +258,16 @@ export default {
           this.dobYear <= this.currentYear
       );
     },
-    validateDay() {
+    localValidateDay() {
       const maxDays = this.daysInMonth;
-      if (this.dobDay < 1 || this.dobDay > maxDays) {
-        this.dobError = `Day must be between 1 and ${maxDays} for the selected month.`;
-      } else {
-        this.dobError = '';
-      }
+      this.errors.dobDay = validateDay(this.dobDay, maxDays);
     },
-    validateYear() {
-      console.log("I am here at 352", [
-        this.dobYear,
-        this.currentYear,
-        this.dobYear < this.currentYear - 100,
-        this.dobYear > this.currentYear
-      ]);
-      if (this.dobYear < this.currentYear - 100 || this.dobYear > this.currentYear) {
-        this.dobError = `Year must be between ${this.currentYear - 100} and ${this.currentYear}.`;
-      } else {
-        this.dobError = '';
-      }
+    localValidateYear() {
+      this.errors.dobYear = validateYear(this.pet.dobYear, this.currentYear)
     },
     savePet() {
-      this.validateYear();
-      this.validateDay();
+      this.localValidateYear();
+      this.localValidateDay();
 
 
       if (this.dobOrAge === 'dob' && this.isValidDob()) {
@@ -290,13 +281,6 @@ export default {
     },
   },
   mounted() {
-    this.updatePetField({ field: 'gender', value: 'Male' });
-    this.updatePetField({ field: 'type', value: 'Dog' });
-
-    this.pet.type = 'Dog';
-    this.pet.gender = 'Male';
-    this.pet.breed = '';
-    // this.pet.
   },
 };
 </script>
