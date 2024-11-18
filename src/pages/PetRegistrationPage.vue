@@ -83,8 +83,6 @@
           />
         </div>
 
-
-
         <!-- Date of Birth -->
         <div v-if="pet.dobOrAge === 'dob'" class="mb-4">
           <label class="block text-gray-700 font-medium text-left mb-2">Date of Birth</label>
@@ -144,34 +142,15 @@
         </div>
 
         <!-- Gender -->
-        <div class="mb-4">
-          <label class="block text-gray-700 font-medium text-left mb-2">Gender</label>
-          <div class="flex items-center">
-            <button
-                type="button"
-                :class="{
-                  'custom-blue-bg text-white custom-blue-border': pet.gender === 'Female',
-                  'bg-white text-blue-500 custom-blue-border': pet.gender !== 'Female',
-                }"
-                class="border rounded-l-lg px-6 py-1 w-1/4 focus:outline-none"
-                @click="selectGender('Female')"
-            >
-              Female
-            </button>
-            <button
-                type="button"
-                :class="{
-                  'custom-blue-bg text-white custom-blue-border': pet.gender === 'Male',
-                  'bg-white text-blue-500 custom-blue-border': pet.gender !== 'Male',
-                }"
-                class="border rounded-r-lg px-6 py-1 w-1/4 focus:outline-none"
-                @click="selectGender('Male')"
-            >
-              Male
-            </button>
-          </div>
-        </div>
-
+        <FormToggleButtonGroup
+            id="gender"
+            label="Gender"
+            v-model="pet.gender"
+            :options="[
+              { label: 'Female', value: 'Female' },
+              { label: 'Male', value: 'Male' },
+            ]"
+        />
 
         <!-- Submit Button -->
         <div class="flex justify-center">
