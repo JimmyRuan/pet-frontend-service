@@ -165,11 +165,8 @@ export default {
     };
   },
   computed: {
-    ...mapState(['pet', 'petTypes', 'ageOptions']),
-    ...mapGetters(['getBreeds']),
-    breeds() {
-      return this.getBreeds(this.pet.type);
-    },
+    ...mapState('pet', ['petTypes', 'ageOptions']),
+    ...mapGetters('pet', ['getBreeds']),
     currentYear() {
       return new Date().getFullYear();
     },
@@ -194,7 +191,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['updatePetField']),
+    ...mapActions('pet', ['updatePetField']),
     daysInMonth(month, year) {
       if (!month || !year) return 0;
       return new Date(year, month, 0).getDate();
@@ -207,15 +204,6 @@ export default {
         this.cantFindBreedOption = 'I don’t know';
         this.pet.cantFindBreedOption = 'I don’t know';
       }
-    },
-    selectPetType(type) {
-      this.updatePetField({ field: 'type', value: type });
-    },
-    selectGender(gender) {
-      this.updatePetField({ field: 'gender', value: gender });
-    },
-    setCantFindBreedOption() {
-      this.updatePetField({ field: 'breed', value: 'CantFindIt' });
     },
     clearDob() {
       this.pet.dobMonth = '';
@@ -275,8 +263,6 @@ export default {
       // Save the pet details
       console.log('Saved Pet:', this.pet);
     },
-  },
-  mounted() {
   },
 };
 </script>
