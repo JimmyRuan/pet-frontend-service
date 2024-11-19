@@ -287,6 +287,7 @@ export default {
 
 
       try {
+        this.$store.dispatch("loader/showLoading");
         this.apiResponse = await this.sendPetData(petRequestData);
         this.showResponseModal = true;
         console.log('Saved Pet:', [this.apiResponse]);
@@ -295,6 +296,7 @@ export default {
         alert("There is some issue with our service. please coming back later")
       } finally {
         this.pet = this.defaultPetInfo();
+        this.$store.dispatch("loader/hideLoading");
       }
     },
   },
