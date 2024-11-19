@@ -116,6 +116,14 @@
         </div>
       </form>
     </div>
+
+
+    <!-- PetResponseModal -->
+    <PetResponseModal
+        v-if="showResponseModal"
+        :response="apiResponse"
+        @close="showResponseModal = false"
+    />
   </div>
 </template>
 
@@ -130,9 +138,10 @@ import {required, validateYearMonthDay} from "@/services/validationRules";
 import {calculateDateOfBirth, createDateFromYMD, formatDateToString} from "@/services/DateService";
 import ConfigService from "@/services/ConfigService";
 import HttpClient from "@/services/HttpClient";
+import PetResponseModal from "@/components/PetResponseModal.vue";
 
 export default {
-  components: {DateOfBirthForm, FormRadioGroup, FormSelect, FormToggleButtonGroup, FormInput},
+  components: {PetResponseModal, DateOfBirthForm, FormRadioGroup, FormSelect, FormToggleButtonGroup, FormInput},
   data() {
     return {
       pet: this.defaultPetInfo(),
@@ -147,6 +156,8 @@ export default {
         ageOption: null,
         mixBreedDetails: null,
       },
+      showResponseModal: false,
+      apiResponse: null,
     };
   },
   computed: {
@@ -273,13 +284,17 @@ export default {
       this.pet.dobStr = this.getBirthDayStr();
       const petRequestData = this.transformPetForCreation(this.pet);
 
-      const response = await this.sendPetData(petRequestData);
-      console.log("I am here at 285", response);
 
-
-
-      // Save the pet details
-      console.log('Saved Pet:', [this.pet, petRequestData]);
+      try {
+        this.apiResponse = await this.sendPetData(petRequestData);
+        this.showResponseModal = true;
+        console.log('Saved Pet:', [this.apiResponse]);
+      } catch (error) {
+        console.error("Error saving pet:", error);
+        alert("There is some issue with our service. please coming back later")
+      } finally {
+        this.pet = this.defaultPetInfo();
+      }
     },
   },
 };
