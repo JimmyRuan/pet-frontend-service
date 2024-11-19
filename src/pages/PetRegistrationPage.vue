@@ -139,6 +139,7 @@ import {calculateDateOfBirth, createDateFromYMD, formatDateToString} from "@/ser
 import ConfigService from "@/services/ConfigService";
 import HttpClient from "@/services/HttpClient";
 import PetResponseModal from "@/components/PetResponseModal.vue";
+import _ from 'lodash';
 
 export default {
   components: {PetResponseModal, DateOfBirthForm, FormRadioGroup, FormSelect, FormToggleButtonGroup, FormInput},
@@ -276,7 +277,7 @@ export default {
 
     async savePet() {
       this.validateData();
-      const hasErrors = Object.values(this.errors).some((error) => error);
+      const hasErrors = Object.values(this.errors).some((error) => !_.isEmpty(error));
       if (hasErrors) {
         return;
       }
