@@ -11,7 +11,7 @@
         </thead>
         <tbody>
         <tr v-for="(value, key) in filteredPetAttributes" :key="key">
-          <td class="border border-gray-300 px-4 py-2 capitalize">{{ key }}</td>
+          <td class="border border-gray-300 px-4 py-2 capitalize">{{ formatKey(key) }}</td>
           <td
               class="border border-gray-300 px-4 py-2"
               :class="key === 'dangerousAnimal' && value ? 'text-red-500 font-bold' : ''"
@@ -34,6 +34,8 @@
 </template>
 
 <script>
+import {capitalizeFirstLetter} from "@/services/util";
+
 export default {
   props: {
     response: {
@@ -56,6 +58,15 @@ export default {
         return value ? "Yes" : "No";
       }
       return value;
+    },
+    formatKey(key){
+      if(key === 'dangerousAnimal'){
+        return 'Is Animal Dangerous?';
+      } else if(key === 'dateOfBirth'){
+        return 'Date of Birth';
+      }
+
+      return capitalizeFirstLetter(key);
     },
     filterResponse(fields) {
       return Object.fromEntries(

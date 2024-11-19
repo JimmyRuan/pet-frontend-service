@@ -31,6 +31,8 @@
             placeholder="dd"
             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
             required
+            :min="1"
+            :max="31"
         />
       </div>
 
@@ -45,6 +47,8 @@
             placeholder="yyyy"
             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
             required
+            :min="calculateYearsAgo(100)"
+            :max="currentYear"
         />
       </div>
     </div>
@@ -57,6 +61,7 @@
 import useErrors from "@/mixins/useErrors";
 import ErrorList from "@/components/form/ErrorList.vue";
 import {getAllMonths} from "@/services/util";
+import moment from "moment";
 
 export default {
   components: {ErrorList},
@@ -79,11 +84,11 @@ export default {
     updateDob(field, value) {
       this.$emit("update-dob", { field, value });
     },
-    validateDay() {
-      this.$emit("validate-day");
-    },
-    validateYear() {
-      this.$emit("validate-year");
+    calculateYearsAgo(yearsAgo) {
+      if (typeof yearsAgo !== 'number' || yearsAgo < 0) {
+        throw new Error("Invalid input: 'yearsAgo' must be a non-negative number.");
+      }
+      return moment().subtract(yearsAgo, 'years').year();
     },
   },
 };
